@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpDTO } from './dto/sign-up.dto';
@@ -39,7 +40,7 @@ export class AuthService {
     return { username, email };
   }
 
-  async signIn(signInDTO: SignInDTO) {
+  async signIn(signInDTO: SignInDTO, session: any) {
     const user = await this.databaseService.user.findUnique({
       where: {
         email: signInDTO.email,
@@ -50,12 +51,33 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    //Add user to the session
-    return user;
+    session.user = { id: user.id, email: user.email };
+    return { username: user.username, email: user.email };
   }
 
-  async me() {
-    //Get the user object from session and return it
-    return 'Me';
+  async me(session) {
+    if (!session.user) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.databaseService.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async logout(session) {
+    session.destroy((err) => {
+      if (err) throw new InternalServerErrorException();
+    });
+    return 'Logged out succesfully';
   }
 }
