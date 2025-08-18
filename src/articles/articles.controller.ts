@@ -8,11 +8,14 @@ import {
   ParseIntPipe,
   ValidationPipe,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDTO } from './dto/create-article.dto';
 import { UpdateArticleDTO } from './dto/update-article.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}

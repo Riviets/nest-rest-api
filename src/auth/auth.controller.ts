@@ -5,11 +5,13 @@ import {
   ValidationPipe,
   Get,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { SignInDTO } from './dto/sign-in.dto';
 import { SignUpDTO } from './dto/sign-up.dto';
 import { AuthService } from './auth.service';
 import type { Request } from 'express';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -28,11 +30,13 @@ export class AuthController {
     return this.authService.signUp(signUpDTO);
   }
 
+  @UseGuards(AuthGuard)
   @Get('me')
   async me(@Req() req: Request) {
     return this.authService.me(req.session);
   }
 
+  @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Req() req: Request) {
     return this.authService.logout(req.session);
