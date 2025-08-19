@@ -19,9 +19,17 @@ export class ArticlesService {
     });
   }
 
-  async create(createArticleDTO: CreateArticleDTO) {
+  async create(
+    createArticleDTO: CreateArticleDTO,
+    imageFile: Express.Multer.File,
+  ) {
+    const data = { ...createArticleDTO };
+    if (imageFile) {
+      data.image = imageFile.filename;
+    }
+    data.authorId = +createArticleDTO.authorId;
     return this.databaseService.article.create({
-      data: createArticleDTO,
+      data,
     });
   }
 

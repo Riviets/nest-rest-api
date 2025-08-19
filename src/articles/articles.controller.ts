@@ -9,11 +9,14 @@ import {
   ValidationPipe,
   Body,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDTO } from './dto/create-article.dto';
 import { UpdateArticleDTO } from './dto/update-article.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard)
 @Controller('articles')
@@ -30,10 +33,16 @@ export class ArticlesController {
   }
 
   @Post()
+  @UseInterceptors(
+    FileInterceptor('image', {
+      dest: './uploads',
+    }),
+  )
   async createArticle(
     @Body(ValidationPipe) createArticleDTO: CreateArticleDTO,
+    @UploadedFile() imageFile: Express.Multer.File,
   ) {
-    return this.articlesService.create(createArticleDTO);
+    return this.articlesService.create(createArticleDTO, imageFile);
   }
 
   @Put(':id')
